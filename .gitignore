@@ -1,0 +1,13 @@
+# Evitar subir dependencias
+node_modules/
+
+# Evitar archivos de entorno
+.env
+
+# Evitar logs
+logs/
+*.log
+
+# Evitar archivos de caché del editor
+.vscode/
+.DS_Store
