@@ -1,10 +1,18 @@
 const express = require("express");
+const http = require("http"); // <-- Asegúrate de importar http
+
 const app = express();
 const port = 3001;
 const cors = require("cors"); // <-- Importa CORS
 
+const configureSocket = require("../socket"); // Importar el módulo de socket
+
+
 const userRoute = require("../routes/userRouter");
 const cookieParser = require("cookie-parser"); // <-- Importa cookie-parser
+
+const server = http.createServer(app); // Servidor HTTP para Socket.io
+
 
 // <-- Habilita CORS para evitar errores de red
 app.use(
@@ -21,10 +29,15 @@ app.use(cookieParser()); // <-- Ahora las cookies estarán habilitadas en todas 
 // Usar las rutas de usuarios
 app.use("/api/users", userRoute);
 
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.listen(port, () => {
+
+// Configurar WebSockets
+configureSocket(server);
+
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

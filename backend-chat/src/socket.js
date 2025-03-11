@@ -1,43 +1,63 @@
-const { Server } = require('socket.io');
-const jwt = require('jsonwebtoken');
-const { secret } = require('../config/jwtConfig');
+const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
+const chatUser = require("./models/chatUsersOrm"); // ✅ Corregido
+const { secret } = require("./config/jwtConfig");
 
 function configureSocket(server) {
-    const io = new Server(server, {
-        cors: {
-            origin: 'http://localhost:3000',
-            methods: ['GET', 'POST']
-        }
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
+
+  io.on("connection", (socket) => {
+    console.log("Nuevo usuario conectado:", socket.id);
+
+    // Evento de autenticación
+    socket.on("authenticate", (token) => {
+      try {
+        const decoded = jwt.verify(token, secret);
+    
+        socket.user = decoded;
+       
+        console.log(`Usuario autenticado: ${decoded.email}`);
+      } catch (error) {
+        console.log("Token inválido:", error.message);
+        socket.disconnect();
+      }
     });
 
-    io.on('connection', (socket) => {
-        console.log('Nuevo usuario conectado:', socket.id);
+    // Manejo de envío de mensajes
+    socket.on("sendMessage", async (data) => {
+      if (!socket.user) {
+        return socket.emit("error", "Usuario no autenticado");
+      }
 
-        // **Recibir y validar el token del usuario**
-        socket.on('authenticate', (token) => {
-            try {
-                const decoded = jwt.verify(token, secret);
-                socket.user = decoded;
-                console.log(`Usuario autenticado: ${decoded.email}`);
-            } catch (error) {
-                console.log('Token inválido:', error.message);
-                socket.disconnect();
-            }
+      try {
+        const newMessage = await chatUser.create({ // ✅ Cambio de ChatUser a chatUser
+          user_id: socket.user.id, // ✅ Asegúrate de que el ID del usuario es correcto
+          message: data.message,
         });
 
-        socket.on('sendMessage', async (data) => {
-            if (!socket.user) {
-                return socket.emit('error', 'Usuario no autenticado');
-            }
+        console.log(`Mensaje guardado en la base de datos: ${newMessage.message}`);
 
-            // **Enviar mensaje solo si el usuario está autenticado**
-            io.emit('receiveMessage', { user: socket.user.email, message: data.message });
+        io.emit("receiveMessage", {
+          user: socket.user.email,
+          message: newMessage.message,
         });
 
-        socket.on('disconnect', () => {
-            console.log('Usuario desconectado:', socket.id);
-        });
+      } catch (error) {
+        console.error("Error al guardar el mensaje:", error);
+      }
     });
+
+    // Manejo de desconexión
+    socket.on("disconnect", () => {
+      console.log("Usuario desconectado:", socket.id);
+    });
+  });
 }
 
 module.exports = configureSocket;
