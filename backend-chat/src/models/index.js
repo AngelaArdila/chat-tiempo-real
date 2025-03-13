@@ -7,12 +7,11 @@ const cors = require("cors"); // <-- Importa CORS
 
 const configureSocket = require("../socket"); // Importar el módulo de socket
 
-
+const chatRoutes = require("../routes/chatRouter");
 const userRoute = require("../routes/userRouter");
 const cookieParser = require("cookie-parser"); // <-- Importa cookie-parser
-
+require("../cronJob"); // 🔥 Inicia las tareas programadas en segundo plano
 const server = http.createServer(app); // Servidor HTTP para Socket.io
-
 
 // <-- Habilita CORS para evitar errores de red
 app.use(
@@ -28,12 +27,12 @@ app.use(cookieParser()); // <-- Ahora las cookies estarán habilitadas en todas 
 
 // Usar las rutas de usuarios
 app.use("/api/users", userRoute);
-
+//ruta de chat
+app.use("/api/chat", chatRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-
 
 // Configurar WebSockets
 configureSocket(server);

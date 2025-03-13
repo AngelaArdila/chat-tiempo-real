@@ -5,6 +5,7 @@ const {
   refreshToken,
   logout,
   verifyAuth,
+  getMessages,
 } = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware"); // Middleware para verificar token
 
@@ -18,5 +19,7 @@ router.post("/logout", logout);
 // **Nuevo endpoint para verificar autenticación**
 
 router.get("/me", authMiddleware, verifyAuth);
+
+
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs"); //para encriptar contraseña
 const User = require("../models/userOrm");
 
+
 const registerUser = async (email, password) => {
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(password, salt);
@@ -18,4 +19,6 @@ const loginUser = async (email, password) => {
   return user; // Usuario autenticado correctamente
 };
 
-module.exports = { registerUser, loginUser };
+
+
+module.exports = { registerUser, loginUser};

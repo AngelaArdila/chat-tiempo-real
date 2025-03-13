@@ -12,6 +12,7 @@ const useAuth = () => {
       setUser(res.user);
       socket.connect();
       socket.emit("authenticate", res.token); // Enviar token al servidor
+
     } catch (error) {
       console.error(
         "Error en el login:",

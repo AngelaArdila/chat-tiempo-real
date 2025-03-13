@@ -1,8 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-const { registerUser, loginUser } = require("../services/userService");
+const { registerUser, loginUser} = require("../services/userService");
 
 const User = require("../models/userOrm");
+
+const ChatUser =require ("../models/chatUsersOrm");
 
 const {
   secret,
@@ -130,5 +132,6 @@ const verifyAuth = async (req, res) => {
       res.status(500).json({ error: "Error en el servidor", details: error.message });
   }
 };
+
 
 module.exports = { registerHandler, loginHandler, refreshToken, logout, verifyAuth };
